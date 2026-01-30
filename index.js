@@ -1,99 +1,9 @@
-/*import express from "express";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import dotenv from "dotenv";
-import connectDB from "./utils/db.js";
-import userRoute from "./routes/user.route.js";
-import companyRoute from "./routes/company.route.js";
-import jobRoute from "./routes/job.route.js";
-import applicationRoute from "./routes/application.route.js";
 
-dotenv.config({});
 
-const app = express();
 
-// middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl)
-    if (!origin) return callback(null, true);
 
-    // Allow any localhost port
-    if (origin.startsWith("http://localhost")) {
-      return callback(null, true);
-    }
-
-    // Otherwise block
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
-
-const PORT = process.env.PORT || 3000;
-
-// api's
-app.use("/api/v1/user", userRoute);
-app.use("/api/v1/company", companyRoute);
-app.use("/api/v1/job", jobRoute);
-app.use("/api/v1/application", applicationRoute);
-
-app.listen(PORT, () => {
-  connectDB();
-  console.log(`Server running at port ${PORT}`);
-});*/
 
 /*import express from "express";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import dotenv from "dotenv";
-import connectDB from "./utils/db.js";
-import userRoute from "./routes/user.route.js";
-import companyRoute from "./routes/company.route.js";
-import jobRoute from "./routes/job.route.js";
-import applicationRoute from "./routes/application.route.js";
-
-dotenv.config();
-
-const app = express();
-
-// middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
-const corsOptions = {
-  origin: true, // allow all origins for now (safer for Vercel)
-  credentials: true
-};
-
-app.use(cors(corsOptions));
-
-// connect DB once
-connectDB();
-
-// routes
-app.use("/api/v1/user", userRoute);
-app.use("/api/v1/company", companyRoute);
-app.use("/api/v1/job", jobRoute);
-app.use("/api/v1/application", applicationRoute);
-
-// DO NOT listen on Vercel
-export default app;
-
-// local development only
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`Server running at port ${PORT}`);
-  });
-}*/
-
-import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -133,6 +43,63 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, async () => {
   await connectDB();
   console.log(`Server running on port ${PORT}`);
+});*/
+
+import express from "express";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import dotenv from "dotenv";
+import connectDB from "./utils/db.js";
+import userRoute from "./routes/user.route.js";
+import companyRoute from "./routes/company.route.js";
+import jobRoute from "./routes/job.route.js";
+import applicationRoute from "./routes/application.route.js";
+
+dotenv.config();
+
+const app = express();
+
+// middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// CORS – allow both local + deployed frontend
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // allow server-to-server, Postman, etc.
+      if (!origin) return callback(null, true);
+
+      // allow localhost (dev)
+      if (origin.startsWith("http://localhost")) {
+        return callback(null, true);
+      }
+
+      // allow Vercel frontend
+      if (origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS not allowed"), false);
+    },
+    credentials: true,
+  })
+);
+
+// routes
+app.use("/api/v1/user", userRoute);
+app.use("/api/v1/company", companyRoute);
+app.use("/api/v1/job", jobRoute);
+app.use("/api/v1/application", applicationRoute);
+
+// IMPORTANT: Render injects PORT automatically
+const PORT = process.env.PORT || 8002;
+
+app.listen(PORT, async () => {
+  await connectDB();
+  console.log(`Server running on port ${PORT}`);
 });
+
 
 
