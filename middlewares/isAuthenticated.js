@@ -11,7 +11,8 @@ const isAuthenticated = (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    // 🔴 CHANGE THIS LINE
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     req.id = decoded.userId;
     next();

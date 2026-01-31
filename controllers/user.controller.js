@@ -87,16 +87,18 @@ export const login = async (req, res) => {
 
     const token = jwt.sign(
       { userId: user._id },
-      process.env.SECRET_KEY,
+      process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
+    // ✅ Set cookie for cross-origin production
     return res
       .status(200)
       .cookie("token", token, {
-        maxAge: 24 * 60 * 60 * 1000,
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
         httpOnly: true,
-        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production", // HTTPS only
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // cross-domain
       })
       .json({
         success: true,
@@ -119,13 +121,16 @@ export const login = async (req, res) => {
   }
 };
 
-
-
 export const logout = async (req, res) => {
   try {
     return res
       .status(200)
-      .cookie("token", "", { maxAge: 0 })
+      .cookie("token", "", {
+        maxAge: 0,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      })
       .json({
         message: "Logged out successfully.",
         success: true,
@@ -134,6 +139,7 @@ export const logout = async (req, res) => {
     console.log(error);
   }
 };
+
 
 export const updateProfile = async (req, res) => {
   try {
